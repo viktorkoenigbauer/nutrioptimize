@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest a focused improvement to the self-hosted project.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe the use case without attaching real diary exports,
+        credentials, tokens or screenshots containing personal data.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Suggested solution
+    validations:
+      required: true
+
+  - type: textarea
+    id: security
+    attributes:
+      label: Security and privacy impact
+      description: Mention new stored fields, network access, permissions or third parties.
+    validations:
+      required: true

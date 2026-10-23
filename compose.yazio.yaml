@@ -1,0 +1,32 @@
+# Optional overlay for the unsupported live YAZIO adapter.  The base Compose
+# file remains runnable with synthetic fixtures and therefore never requires
+# private YAZIO credentials.
+services:
+  sync:
+    environment:
+      SYNC_SOURCE: yazio
+      YAZIO_EMAIL_FILE: /run/secrets/yazio_email
+      YAZIO_PASSWORD_FILE: /run/secrets/yazio_password
+      YAZIO_CLIENT_ID_FILE: /run/secrets/yazio_client_id
+      YAZIO_CLIENT_SECRET_FILE: /run/secrets/yazio_client_secret
+      YAZIO_BASE_URL: ${YAZIO_BASE_URL:-https://yzapi.yazio.com}
+      YAZIO_API_VERSION: ${YAZIO_API_VERSION:-v22}
+      YAZIO_USER_AGENT: ${YAZIO_USER_AGENT:?Set YAZIO_USER_AGENT in .env}
+      YAZIO_ACCEPT_LANGUAGE: ${YAZIO_ACCEPT_LANGUAGE:-de-AT,de;q=0.9,en;q=0.8}
+      YAZIO_TIMEOUT_SECONDS: ${YAZIO_TIMEOUT_SECONDS:-20}
+      YAZIO_MAX_CONCURRENCY: ${YAZIO_MAX_CONCURRENCY:-4}
+    secrets:
+      - yazio_email
+      - yazio_password
+      - yazio_client_id
+      - yazio_client_secret
+
+secrets:
+  yazio_email:
+    file: ./secrets/yazio_email.txt
+  yazio_password:
+    file: ./secrets/yazio_password.txt
+  yazio_client_id:
+    file: ./secrets/yazio_client_id.txt
+  yazio_client_secret:
+    file: ./secrets/yazio_client_secret.txt

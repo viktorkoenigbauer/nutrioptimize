@@ -1,0 +1,54 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Validate shell scripts
+        run: |
+          bash -n scripts/deploy.sh
+          sh -n scripts/first-sync.sh scripts/init-secrets.sh scripts/init-yazio-secrets.sh scripts/setup.sh scripts/update-yazio-account-secrets.sh
+          shellcheck scripts/*.sh
+
+      - name: Lint Python
+        run: |
+          python3 -m pip install --requirement requirements-dev.txt
+          ruff check app migrations scripts/check_mcp.py tests
+          ruff format --check app migrations scripts/check_mcp.py tests
+          pip-audit --requirement requirements.txt --progress-spinner off
+
+      - name: Validate Docker Compose
+        run: |
+          docker compose config > /dev/null
+          YAZIO_USER_AGENT=ci-validation \
+            docker compose -f compose.yaml -f compose.yazio.yaml config > /dev/null
+
+      - name: Build the application image
+        run: docker build --tag nutrioptimize:test .
+
+      - name: Run unit tests
+        run: |
+          docker run --rm \
+            --env POSTGRES_PASSWORD_FILE=/etc/hostname \
+            --env API_BEARER_TOKEN_FILE=/etc/hostname \
+            --volume "$PWD/tests:/tests:ro" \
+            nutrioptimize:test \
+            python -m unittest discover -s /tests -v
