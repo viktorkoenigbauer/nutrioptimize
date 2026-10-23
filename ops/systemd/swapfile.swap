@@ -1,0 +1,8 @@
+[Unit]
+Description=NutriOptimize swap file
+
+[Swap]
+What=/swapfile
+
+[Install]
+WantedBy=swap.target

@@ -1,0 +1,160 @@
+name: nutrioptimize
+
+x-app-environment: &app-environment
+  APP_TIMEZONE: ${APP_TIMEZONE:-Europe/Vienna}
+  PUBLIC_HOST: ${PUBLIC_HOST:-localhost}
+  POSTGRES_HOST: db
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: ${POSTGRES_DB:-nutrioptimize}
+  POSTGRES_USER: ${POSTGRES_USER:-nutrioptimize}
+  POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+  API_BEARER_TOKEN_FILE: /run/secrets/api_bearer_token
+  SYNC_SOURCE: ${SYNC_SOURCE:-fixture}
+  SYNC_INTERVAL_SECONDS: ${SYNC_INTERVAL_SECONDS:-3600}
+  SYNC_LOOKBACK_DAYS: ${SYNC_LOOKBACK_DAYS:-7}
+  MCP_ALLOWED_ORIGINS: ${MCP_ALLOWED_ORIGINS:-}
+  MCP_AUTH_MODE: ${MCP_AUTH_MODE:-static}
+  MCP_OAUTH_ISSUER: ${MCP_OAUTH_ISSUER:-}
+  MCP_OAUTH_AUDIENCE: ${MCP_OAUTH_AUDIENCE:-}
+  MCP_OAUTH_JWKS_URL: ${MCP_OAUTH_JWKS_URL:-}
+  MCP_OAUTH_RESOURCE_URL: ${MCP_OAUTH_RESOURCE_URL:-}
+  MCP_OAUTH_REQUIRED_SCOPES: ${MCP_OAUTH_REQUIRED_SCOPES:-nutrition:read}
+  MCP_OAUTH_ALLOWED_SUBJECTS: ${MCP_OAUTH_ALLOWED_SUBJECTS:-}
+
+# The Python containers do not need Linux capabilities or a writable root
+# filesystem. Keeping these restrictions here makes new app services inherit the
+# same security baseline instead of relying on every contributor to remember it.
+x-python-hardening: &python-hardening
+  read_only: true
+  # Compose file-backed secrets keep their host ownership. Add only the
+  # operator's numeric primary group so the non-root app user can read files
+  # with mode 0440. Override this value when the host primary GID is not 1000.
+  group_add:
+    - "${HOST_SECRET_GID:-1000}"
+  tmpfs:
+    - /tmp:size=64m,mode=1777
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  init: true
+
+x-default-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    image: postgres:17-alpine@sha256:eee6c6e1b0894fa4fe0075eb054af9fd1cf39a35321c2d4110626cfe506411fb
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nutrioptimize}
+      POSTGRES_USER: ${POSTGRES_USER:-nutrioptimize}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    logging: *default-logging
+
+  migrate:
+    <<: *python-hardening
+    build: .
+    environment: *app-environment
+    secrets:
+      - postgres_password
+    command: ["alembic", "upgrade", "head"]
+    networks:
+      - backend
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+    logging: *default-logging
+
+  api:
+    <<: *python-hardening
+    build: .
+    restart: unless-stopped
+    environment: *app-environment
+    secrets:
+      - postgres_password
+      - api_bearer_token
+    networks:
+      - backend
+      # OAuth access tokens are verified against Auth0's public JWKS. Keep the
+      # database on the isolated backend network while allowing only this
+      # application container to make the required outbound HTTPS request.
+      - egress
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=2)"]
+      interval: 15s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    logging: *default-logging
+
+  sync:
+    <<: *python-hardening
+    build: .
+    restart: unless-stopped
+    environment: *app-environment
+    secrets:
+      - postgres_password
+    command: ["python", "-m", "app.sync_loop"]
+    networks:
+      - backend
+      - egress
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    logging: *default-logging
+
+  caddy:
+    image: caddy:2-alpine@sha256:eb4d35b7452d1ab6171fbdbe8d9275b2301dad6dad92115d91e19fb9b24d510f
+    restart: unless-stopped
+    environment:
+      PUBLIC_ADDRESS: ${PUBLIC_ADDRESS:-http://localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - backend
+      - edge
+    depends_on:
+      api:
+        condition: service_healthy
+    logging: *default-logging
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
+  api_bearer_token:
+    file: ./secrets/api_bearer_token.txt
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  backend:
+    internal: true
+  edge:
+  egress:

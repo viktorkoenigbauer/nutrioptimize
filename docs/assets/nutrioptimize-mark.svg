@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">NutriOptimize</title>
+  <desc id="description">A bowl, a leaf and three connected nutrient data points.</desc>
+  <path
+    fill="#0891B2"
+    d="M58 267c55 38 122 57 198 57s143-19 198-57c-16 112-91 187-198 187S74 379 58 267Z"
+  />
+  <path
+    fill="#34D399"
+    d="M249 281c-73-8-118-62-112-145 80 8 138 55 129 126l-17 19Zm-82-119c18 41 49 72 89 93-22-38-51-69-89-93Z"
+    fill-rule="evenodd"
+  />
+  <path
+    fill="none"
+    stroke="#34D399"
+    stroke-linecap="round"
+    stroke-width="20"
+    d="m287 283 53-61 67-94"
+  />
+  <circle cx="287" cy="283" r="24" fill="#34D399" />
+  <circle cx="340" cy="222" r="29" fill="#34D399" />
+  <circle cx="407" cy="128" r="36" fill="#34D399" />
+</svg>

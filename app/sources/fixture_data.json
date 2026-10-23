@@ -1,0 +1,80 @@
+[
+  {
+    "id": "fixture-breakfast-1",
+    "consumed_at": "2026-10-15T08:15:00+02:00",
+    "meal": "breakfast",
+    "food_name": "Haferflocken mit Skyr und Beeren",
+    "quantity": 420,
+    "unit": "g",
+    "nutrients": {
+      "energy_kcal": 505,
+      "protein_g": 32.4,
+      "carbohydrate_g": 63.1,
+      "fat_g": 11.2,
+      "fiber_g": 10.8,
+      "sugar_g": 18.4,
+      "calcium_mg": 318,
+      "iron_mg": 4.1,
+      "magnesium_mg": 146
+    }
+  },
+  {
+    "id": "fixture-lunch-1",
+    "consumed_at": "2026-10-15T12:40:00+02:00",
+    "meal": "lunch",
+    "food_name": "Linsencurry mit Naturreis",
+    "quantity": 610,
+    "unit": "g",
+    "nutrients": {
+      "energy_kcal": 742,
+      "protein_g": 29.7,
+      "carbohydrate_g": 111.3,
+      "fat_g": 17.5,
+      "fiber_g": 21.6,
+      "sugar_g": 13.2,
+      "potassium_mg": 1420,
+      "iron_mg": 7.8,
+      "magnesium_mg": 191,
+      "zinc_mg": 4.4
+    }
+  },
+  {
+    "id": "fixture-dinner-1",
+    "consumed_at": "2026-10-15T19:10:00+02:00",
+    "meal": "dinner",
+    "food_name": "Lachs, Kartoffeln und Brokkoli",
+    "quantity": 540,
+    "unit": "g",
+    "nutrients": {
+      "energy_kcal": 681,
+      "protein_g": 48.3,
+      "carbohydrate_g": 58.4,
+      "fat_g": 27.8,
+      "fiber_g": 10.1,
+      "sugar_g": 7.6,
+      "potassium_mg": 1760,
+      "vitamin_c_mg": 121,
+      "vitamin_d_ug": 18.7,
+      "vitamin_b12_ug": 5.9
+    }
+  },
+  {
+    "id": "fixture-snack-1",
+    "consumed_at": "2026-10-15T16:30:00+02:00",
+    "meal": "snack",
+    "food_name": "Vollkornbrot mit Ei und Paprika",
+    "quantity": 330,
+    "unit": "g",
+    "nutrients": {
+      "energy_kcal": 458,
+      "protein_g": 25.2,
+      "carbohydrate_g": 48.7,
+      "fat_g": 17.6,
+      "fiber_g": 9.3,
+      "sugar_g": 8.2,
+      "iron_mg": 4.7,
+      "vitamin_c_mg": 96,
+      "vitamin_b12_ug": 1.9
+    }
+  }
+]

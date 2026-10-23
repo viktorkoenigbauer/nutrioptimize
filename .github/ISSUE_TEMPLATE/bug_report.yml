@@ -1,0 +1,65 @@
+name: Bug report
+description: Report reproducible behavior using synthetic or anonymized data.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve NutriOptimize. Do not include passwords,
+        tokens, `.env` contents, database dumps or real nutrition records.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Release tag or commit ID.
+      placeholder: v0.1.0-beta.1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Setup or deployment
+        - YAZIO synchronization
+        - OAuth or ChatGPT connection
+        - Nutrition data or MCP response
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+      description: Redact hostnames, account identifiers and personal data.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Use the included fixture data or another synthetic example.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Privacy check
+      options:
+        - label: I removed credentials, tokens, personal nutrition data and private infrastructure details.
+          required: true
